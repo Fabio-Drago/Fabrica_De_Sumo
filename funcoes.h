@@ -1,105 +1,83 @@
-// funcoes.h
 #ifndef FUNCOES_H
 #define FUNCOES_H
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
 
-// Definições de constantes
-#define MAX_NOME 50
-#define MAX_PILHA 8  // 4 empilhamentos * 2 caixas
-#define CUSTO_CAIXA 110
-#define PRECO_VENDA 400
-
-// Definições de tipos
-typedef enum {
-    LARANJA,
-    ANANAS
-} TipoSumo;
-
+// Definição da estrutura Caixa
 typedef struct {
-    int numGarrafas;
-    TipoSumo tipo;
-    int validada;
-    int etiquetada;
-    double custo;
-    double preco;
+    int numGarrafas;    // Quantidade de garrafas (4-8)
+    int tipo;           // 0-Laranja, 1-Ananas
+    bool validada;      // Se passou pela validação
+    bool etiquetada;    // Se foi etiquetada
+    float custo;        // Custo de produção (110 KZ por caixa)
+    float preco;        // Preço de venda (400 KZ por caixa)
 } Caixa;
 
-typedef struct No {
+// Definição do nó para o tapete rolante (lista circular)
+typedef struct NodeTapete {
     Caixa caixa;
-    struct No* proximo;
-    struct No* anterior;
-} No;
+    struct NodeTapete* proximo;
+} NodeTapete;
 
+// Estrutura do Tapete Rolante
 typedef struct {
-    No* atual;
-    int sentidoHorario;
-    int tamanho;
+    NodeTapete* inicio;
+    NodeTapete* fim;
+    int direcao;        // 1 = horário, -1 = anti-horário
 } TapeteRolante;
 
-typedef struct NoFila {
-    Caixa caixa;
-    struct NoFila* proximo;
-} NoFila;
-
+// Estrutura da Fila de Empilhamento
 typedef struct {
-    NoFila* frente;
-    NoFila* tras;
-    int tamanho;
+    Caixa caixas[2];    // Armazena até 2 caixas para empilhar
+    int frente;
+    int tras;
 } FilaEmpilhamento;
 
+// Estrutura de uma Pilha (máximo 4 empilhamentos = 8 caixas)
 typedef struct {
-    Caixa* pilha;
-    int topo;
-    int capacidade;
+    Caixa caixas[8];    // Pilha de caixas (2 caixas por empilhamento)
+    int topo;           // Índice do topo da pilha
 } Pilha;
 
+// Estrutura do Empilhador (TAD)
 typedef struct {
-    char nome[MAX_NOME];
-    int caixasEmpilhadas;
+    Pilha pilhaLaranja; // Pilha para caixas de laranja
+    Pilha pilhaAnanas;  // Pilha para caixas de ananás
     FilaEmpilhamento fila;
-    Pilha pilhaLaranja;
-    Pilha pilhaAnanas;
+    int totalEmpilhamentos;
 } Empilhador;
 
+// Estrutura para estatísticas
 typedef struct {
-    int laranjaEtiquetadas;
-    int ananasEtiquetadas;
-    int laranjaDescartadas;
-    int ananasDescartadas;
-    double lucroLaranja;
-    double lucroAnanas;
+    int caixasValidasLaranja;
+    int caixasValidasAnanas;
+    int caixasDescartadasLaranja;
+    int caixasDescartadasAnanas;
+    float lucroLaranja;
+    float lucroAnanas;
+    float prejuizoTotal;
 } Estatisticas;
 
-// Protótipos das funções do Tapete Rolante
-TapeteRolante* inicializarTapete(void);
-void inserirCaixa(TapeteRolante* tapete, Caixa caixa);
-void inverterSentido(TapeteRolante* tapete);
-void validarCaixas(TapeteRolante* tapete, Estatisticas* stats);
-void etiquetarCaixas(TapeteRolante* tapete);
-Caixa removerCaixa(TapeteRolante* tapete);
-void imprimirTapete(TapeteRolante* tapete);
-
-// Protótipos das funções do Empilhador
-Empilhador* inicializarEmpilhador(void);
-void enfileirarCaixa(Empilhador* empilhador, Caixa caixa);
-void empilharCaixas(Empilhador* empilhador);
-void imprimirFilaEmpilhamento(Empilhador* empilhador);
-void imprimirPilhas(Empilhador* empilhador);
-
-// Protótipos das funções de arquivo e relatórios
-void carregarCaixasFicheiro(TapeteRolante* tapete, const char* nomeFicheiro);
-void entradaManualCaixa(TapeteRolante* tapete);
-void gerarRelatorios(Estatisticas* stats, const char* nomeFicheiro);
+// Protótipos de funções
+TapeteRolante* inicializarTapete();
+Empilhador* inicializarEmpilhador();
 void liberarMemoria(TapeteRolante* tapete, Empilhador* empilhador);
 
-// Protótipos das funções auxiliares
-void atualizarEstatisticas(Estatisticas* stats);
-int pilhaCheia(Pilha* pilha);
-int pilhaVazia(Pilha* pilha);
-void criarNovaPilha(Pilha* pilha);
+void carregarCaixasFicheiro(TapeteRolante* tapete, const char* nomeArquivo);
+void inserirCaixa(TapeteRolante* tapete, Caixa caixa);
+void validarCaixas(TapeteRolante* tapete, Estatisticas* stats);
+void inverterSentido(TapeteRolante* tapete);
+void etiquetarCaixas(TapeteRolante* tapete, Estatisticas* stats);
+Caixa removerCaixa(TapeteRolante* tapete);
+void enfileirarCaixa(Empilhador* empilhador, Caixa caixa);
+void empilharCaixas(Empilhador* empilhador, Estatisticas* stats);
+void imprimirTapete(TapeteRolante* tapete);
+void imprimirFilaEmpilhamento(Empilhador* empilhador);
+void imprimirPilhas(Empilhador* empilhador);
+void gerarRelatorios(Estatisticas* stats, const char* nomeArquivo);
 void verificarEstadoSistema(TapeteRolante* tapete, Empilhador* empilhador, Estatisticas* stats);
+int contarCaixasNoTapete(TapeteRolante* tapete);
 
 #endif
