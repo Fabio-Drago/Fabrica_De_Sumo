@@ -1,9 +1,10 @@
-#include "funcoes.h"
+#include "funcoes.c"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-// Função para validar se uma string contém apenas dígitos
+// Função para validar entrada de apenas dígitos
 int apenasDigitos(const char* str) {
     while (*str) {
         if (!isdigit(*str)) return 0;
@@ -12,7 +13,7 @@ int apenasDigitos(const char* str) {
     return 1;
 }
 
-// Função para imprimir o menu principal
+// Funções do Menu
 void imprimirMenu() {
     printf("\n===== FÁBRICA DE SUMOS =====\n");
     printf("1. Inserir caixa no tapete\n");
@@ -27,14 +28,12 @@ void imprimirMenu() {
     printf("Escolha uma opção: ");
 }
 
-// Função para imprimir o submenu de inserção de caixa
 void imprimirSubmenuInserirCaixa() {
     printf("\n=== SUBMENU: INSERIR CAIXA ===\n");
     printf("1. Automático (arquivo)\n");
     printf("2. Manual\n");
 }
 
-// Função para imprimir o menu de impressão
 void imprimirSubmenuImpressao() {
     printf("\n=== MENU DE IMPRESSÃO ===\n");
     printf("1. Imprimir Tapete\n");
@@ -42,7 +41,7 @@ void imprimirSubmenuImpressao() {
     printf("3. Imprimir Pilhas\n");
 }
 
-// Função melhorada para obter escolha válida do menu
+// Funções de validação de entrada
 int obterEscolhaMenu() {
     char buffer[100];
     int escolha;
@@ -56,7 +55,7 @@ int obterEscolhaMenu() {
         buffer[strcspn(buffer, "\n")] = 0;
         
         if (strlen(buffer) == 0) {
-            printf("Entrada vazia. Por favor, digite um número entre 1 e 9: ");
+            printf("Entrada vazia. Digite um número entre 1 e 9: ");
             continue;
         }
 
@@ -66,9 +65,8 @@ int obterEscolhaMenu() {
         }
 
         escolha = atoi(buffer);
-        
         if (escolha < 1 || escolha > 9) {
-            printf("Opção inválida! Por favor, escolha um número entre 1 e 9: ");
+            printf("Opção inválida! Escolha um número entre 1 e 9: ");
             continue;
         }
 
@@ -76,13 +74,12 @@ int obterEscolhaMenu() {
     }
 }
 
-// Função melhorada para obter escolha válida do submenu
-int obterEscolhaSubmenu(int limiteMin, int limiteMax) {
+int obterEscolhaSubmenu(int min, int max) {
     char buffer[100];
     int escolha;
     
     while (1) {
-        printf("Escolha uma opção (%d-%d): ", limiteMin, limiteMax);
+        printf("Escolha uma opção (%d-%d): ", min, max);
         
         if (!fgets(buffer, sizeof(buffer), stdin)) {
             printf("Erro na leitura. Tente novamente.\n");
@@ -92,7 +89,7 @@ int obterEscolhaSubmenu(int limiteMin, int limiteMax) {
         buffer[strcspn(buffer, "\n")] = 0;
         
         if (strlen(buffer) == 0) {
-            printf("Entrada vazia. Por favor, digite um número entre %d e %d.\n", limiteMin, limiteMax);
+            printf("Entrada vazia. Digite um número entre %d e %d.\n", min, max);
             continue;
         }
 
@@ -102,9 +99,8 @@ int obterEscolhaSubmenu(int limiteMin, int limiteMax) {
         }
 
         escolha = atoi(buffer);
-        
-        if (escolha < limiteMin || escolha > limiteMax) {
-            printf("Opção inválida! Por favor, escolha um número entre %d e %d.\n", limiteMin, limiteMax);
+        if (escolha < min || escolha > max) {   
+            printf("Opção inválida! Escolha um número entre %d e %d.\n", min, max);
             continue;
         }
 
@@ -112,7 +108,6 @@ int obterEscolhaSubmenu(int limiteMin, int limiteMax) {
     }
 }
 
-// Função melhorada para validar o tipo de sumo
 int obterTipoSumo() {
     char buffer[100];
     int tipo;
@@ -138,9 +133,8 @@ int obterTipoSumo() {
         }
 
         tipo = atoi(buffer);
-        
         if (tipo != 0 && tipo != 1) {
-            printf("Opção inválida! Digite apenas 0 para Laranja ou 1 para Ananas.\n");
+            printf("Tipo inválido! Digite 0 para Laranja ou 1 para Ananas.\n");
             continue;
         }
 
@@ -148,7 +142,6 @@ int obterTipoSumo() {
     }
 }
 
-// Função melhorada para validar o número de garrafas
 int obterNumeroGarrafas() {
     char buffer[100];
     int numGarrafas;
@@ -174,9 +167,8 @@ int obterNumeroGarrafas() {
         }
 
         numGarrafas = atoi(buffer);
-        
         if (numGarrafas < 4 || numGarrafas > 8) {
-            printf("Número inválido! Por favor, escolha um número entre 4 e 8.\n");
+            printf("Número inválido! Digite um número entre 4 e 8.\n");
             continue;
         }
 
@@ -184,8 +176,8 @@ int obterNumeroGarrafas() {
     }
 }
 
-// Função principal
 int main() {
+    // Inicialização do sistema
     TapeteRolante* tapete = inicializarTapete();
     if (tapete == NULL) {
         printf("Erro ao inicializar tapete. Encerrando programa.\n");
@@ -199,15 +191,16 @@ int main() {
         return 1;
     }
 
-    Estatisticas stats = {0};
+    Estatisticas stats = {0};  // Inicializa todas as estatísticas com zero
     int escolha;
 
+    // Loop principal do programa
     do {
         imprimirMenu();
         escolha = obterEscolhaMenu();
 
         switch (escolha) {
-            case 1: {
+            case 1: { // Inserir caixa
                 imprimirSubmenuInserirCaixa();
                 int subEscolha = obterEscolhaSubmenu(1, 2);
 
@@ -216,37 +209,59 @@ int main() {
                 } else {
                     int tipo = obterTipoSumo();
                     int numGarrafas = obterNumeroGarrafas();
-                    Caixa novaCaixa = {tipo, numGarrafas, 0}; // 0 indica não etiquetada
+                    Caixa novaCaixa = {numGarrafas, tipo, 0, 0, 0.0, 0.0};
                     inserirCaixa(tapete, novaCaixa);
+                    printf("Caixa inserida com sucesso!\n");
                 }
                 break;
             }
 
-            case 2:
+            case 2: { // Validar
                 validarCaixas(tapete, &stats);
-                break;
-
-            case 3:
-                inverterSentido(tapete);
-                break;
-
-            case 4:
-                etiquetarCaixas(tapete);
-                break;
-
-            case 5: {
-                Caixa caixa = removerCaixa(tapete);
-                if (caixa.etiquetada) {
-                    enfileirarCaixa(empilhador, caixa);
-                }
+                printf("Caixas validadas com sucesso!\n");
                 break;
             }
 
-            case 6:
-                empilharCaixas(empilhador);
+            case 3: { // Inverter
+                inverterSentido(tapete);
+                printf("Sentido do tapete invertido!\n");
                 break;
+            }
 
-            case 7: {
+            case 4: { // Etiquetar
+                // Validar caixas antes de etiquetar
+                validarCaixas(tapete, &stats);
+                etiquetarCaixas(tapete, &stats);
+                printf("Caixas etiquetadas com sucesso!\n");
+                break;
+            }
+
+            case 5: { // Encaminhar
+                // Encaminhar duas caixas por vez para empilhamento
+                for (int i = 0; i < 2; i++) {
+                    Caixa caixa = removerCaixa(tapete);
+                    if (caixa.numGarrafas > 0) { 
+                        if (caixa.validada && caixa.etiquetada) {
+                            enfileirarCaixa(empilhador, caixa);
+                        } else {
+                            printf("Caixa removida do tapete (não validada/etiquetada).\n");
+                        }
+                    } else {
+                        if (i == 0) printf("Nenhuma caixa disponível para encaminhar.\n");
+                        break;
+                    }
+                }
+                printf("Caixas encaminhadas para empilhamento!\n");
+                break;
+            }
+
+            case 6: { // Empilhar
+                empilharCaixas(empilhador, &stats);
+                printf("Caixas empilhadas com sucesso!\n");
+                break;
+            }
+
+            case 7: { // Imprimir
                 imprimirSubmenuImpressao();
                 int subEscolha = obterEscolhaSubmenu(1, 3);
                 
@@ -264,26 +279,28 @@ int main() {
                 break;
             }
 
-            case 8:
+            case 8: { // Terminar simulação
                 printf("\nGerando relatórios e finalizando simulação...\n");
                 gerarRelatorios(&stats, "saida.txt");
-                atualizarEstatisticas(&stats);
                 verificarEstadoSistema(tapete, empilhador, &stats);
 
+                // Reiniciar sistema
                 liberarMemoria(tapete, empilhador);
                 tapete = inicializarTapete();
                 empilhador = inicializarEmpilhador();
                 stats = (Estatisticas){0};
                 printf("Simulação reiniciada!\n");
                 break;
+            }
 
-            case 9:
+            case 9: // Sair
                 printf("Encerrando programa...\n");
                 break;
         }
 
     } while (escolha != 9);
 
+    // Limpeza final
     liberarMemoria(tapete, empilhador);
     printf("Programa encerrado com sucesso!\n");
     return 0;
